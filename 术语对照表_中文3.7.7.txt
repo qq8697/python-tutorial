@@ -1,0 +1,4 @@
+术语对照表
+https://docs.python.org/zh-cn/3.7/glossary.html
+函数式编程
+https://docs.python.org/zh-cn/3.7/howto/functional.html
