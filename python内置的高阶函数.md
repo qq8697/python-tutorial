@@ -244,25 +244,94 @@ print(list(it))
 	# grouper-A -> ('大同', '山西'), ('朔州', '山西'), ('忻州', '山西')
 	```
 
-## 三、functools 模块 包含了一些高阶函数（接受一个或多个函数作为输入，返回新的函数）
-### reduce
-`functools.reduce(function, iterable[, initializer])` 把一个函数作用在一个 iterable 上，这个函数必须接收两个参数，reduce 把结果继续和 iterable 的下一个元素做累积计算，其效果就是 reduce(f, [x1, x2, x3, x4]) = f(f(f(x1, x2), x3), x4)
+## 三、functools 模块 
+包含了一些高阶函数（接受一个或多个函数作为输入，返回新的函数）
 
-使用 reduce 累加求和
+### 1. reduce
+`reduce(function, iterable[, initializer])` 把一个函数作用在一个 `iterable` 上，这个函数必须接收两个参数，reduce 把结果继续和 `iterable` 的下一个元素做累积计算，其效果就是 `reduce(f, [x1, x2, x3, x4]) = f(f(f(x1, x2), x3), x4)`
+
+使用 `reduce` 累加求和
 ```
-from functools import reduce
+from functools import *
+
 def add(x, y):
     return x + y
+
 r = reduce(add, [1,2,3])
 print(r)
 ```
 
-### partial
-`functools.partial(func, *args, **keywords)`
+`itertools` 模块的 `accumulate(iterable[, func])` 函数，执行同样的计算, 不同于 `reduce` 只返回最终结果，会返回一个迭代器来输出所有中间结果
 
-## operator 模块 包含一系列对应于 Python 操作符的函数
+### 2. partial
+`partial(func, *args, **keywords)` 通过给定部分参数，将已有的函数构变形称新的函数
 
+由 log 函数创建 server_log 函数
+```
+from functools import *
 
+def log(message, system):
+    print('%s: %s' % (system, message))
+
+server_log = partial(log, system='server')
+server_log('Unable to open socket')
+```
+
+说明：
+返回的是 `partial` 对象，- 与 `function` 对象的类似之处在于都是可调用、可弱引用的对象并可拥有属性；区别早会前者不会自动创建 `__name__` 和 `__doc__` 属性；而且，在类中定义的 `partial` 对象的行为类似于静态方法，并且不会在实例属性查找期间转换为绑定方法。
+
+### 3. lru_cache
+`lru_cache(maxsize=128, typed=False)` 一个为函数提供缓存功能的装饰器。
+说明：
+- LRU：最久未使用算法
+- `lru_cache` 函数的参数
+	- `maxsize` 设置为 `None` ，LRU功能将被禁用且缓存数量无上限。；`maxsize` 设置为2的幂时可获得最佳性能。
+	- `typed` 设置为 `True`，不同类型的函数参数将被分别缓存。例如， `f(3)` 和 `f(3.0)` 会被缓存两次。
+- 被装饰函数的参数
+	- 由于使用了字典存储缓存，所以该函数的固定参数和关键字参数必须是可哈希的（即不可变数据类型）
+	- 不同模式的参数会产生多个缓存项，例如, `f(a=1, b=2)` 和 f`(b=2, a=1)` 会被缓存两次。
+- 装饰后函数的方法和属性
+	- `cache_info()` 返回一个具名元组，包含命中次数 hits，未命中次数 misses ，最大缓存数量 maxsize 和 当前缓存大小 currsize。（在多线程环境中，命中数与未命中数是不完全准确的。）
+	- `cache_clear()` 用于清理/使缓存失效的函数。
+	- `__wrapped__` 属性可以访问原始的未经装饰的函数。它可以用于检查、绕过缓存，或使用不同的缓存再次装饰原始函数。
+
+静态 Web 内容的 LRU 缓存示例:
+```
+import urllib.request, urllib.error
+from functools import *
+
+@lru_cache(maxsize=32)
+def get_pep(num):
+    """Retrieve text of a Python Enhancement Proposal"""
+    resource = 'http://www.python.org/dev/peps/pep-%04d/' % num
+    try:
+        with urllib.request.urlopen(resource) as s:
+            return s.read()
+    except urllib.error.HTTPError:
+        return 'Not Found'
+
+for n in 8, 290, 308, 320, 8, 218, 320, 279, 289, 320, 9991:
+    pep = get_pep(n)
+    print(n, len(pep))
+
+print(get_pep.cache_info())
+```
+
+使用缓存在递归函数中的应用，斐波那契数列：
+```
+from functools import *
+
+@lru_cache(maxsize=None)
+def fib(n):
+    if n < 2:
+        return n
+	# if n % 2 == 0:
+    #    fib.cache_clear()
+    return fib(n-1) + fib(n-2)
+
+print([fib(n) for n in range(16)])
+print(fib.cache_info())
+```
 
 # 参考文档
-1. 官网 [内置函数](https://docs.python.org/3.5/library/functions.html) all any enumerate filter map zip sorted | [排序指南](https://docs.python.org/3.5/howto/sorting.html#sortinghowto) | [itertools](https://docs.python.org/3.5/library/itertools.html?highlight=itertools) | [functools.reduce](https://docs.python.org/zh-cn/3.7/library/functools.html#functools.reduce) 
+1. 官网 [内置函数](https://docs.python.org/3.5/library/functions.html) all any enumerate filter map zip sorted | [排序指南](https://docs.python.org/3.5/howto/sorting.html#sortinghowto) | [itertools 模块](https://docs.python.org/3.5/library/itertools.html?highlight=itertools) | [functools 模块](https://docs.python.org/3.5/library/functools.html#module-functools) 
