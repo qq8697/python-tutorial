@@ -264,9 +264,9 @@ print(r)
 `itertools` 模块的 `accumulate(iterable[, func])` 函数，执行同样的计算, 不同于 `reduce` 只返回最终结果，会返回一个迭代器来输出所有中间结果
 
 ### 2. partial
-`partial(func, *args, **keywords)` 通过给定部分参数，将已有的函数构变形称新的函数
+`partial(func, *args, **keywords)` 通过给定部分参数，将已有的函数变形成新的函数
 
-由 log 函数创建 server_log 函数
+由 `log` 函数创建 `server_log` 函数
 ```
 from functools import *
 
