@@ -1,4 +1,4 @@
-# 高阶函数的应用
+# 柯里化、惰性求值和Continuations
 
 ## 函数柯里化 currying
 一个 currying 的函数首先会接受一些参数，接受了这些参数之后，该函数并不会立即求值，而是继续返回另外一个函数，刚才传入的参数在函数形成的闭包中被保存起来，**待到函数被真正求值的时候，之前传入的所有参数会被一次性用于求值**。
@@ -93,11 +93,11 @@
 功能上：待到真正求值的时候，之前传入的所有参数一次求值。
 
 # 参考文档
-[Functional Programming](http://www.defmacro.org/2006/06/19/fp.html) 一个使用 Java 示例的函数式编程的总体介绍。
+1. [Functional Programming](http://www.defmacro.org/2006/06/19/fp.html) 一个使用 Java 示例的函数式编程的总体介绍。
 - Higher Order Functions 高阶函数
 - Currying 柯里化
-- Lazy Evaluation 懒加载
-- Continuations
+- Lazy Evaluation 惰性求值
 - Closures 闭包
-
+- Continuations 延续
+1. 阮一峰 [函数式编程入门教程](http://www.ruanyifeng.com/blog/2017/02/fp-tutorial.html)
 [Python Advanced Course Topics](https://www.python-course.eu/currying_in_python.php)
