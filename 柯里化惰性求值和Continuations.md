@@ -90,12 +90,66 @@ avg = curry(avg)
 print(avg(1)(3)(6)(0)())
 ```
 
+## 惰性求值 Lazy Evaluation
+惰性计算，指在真正需要执行的时候才计算表达式的值，可以表示为“延迟求值”和“最小化求值”，这是两个既相关又区别的概念，相关表现在其目的均是需要时才计算，其区别如其字面，一个在于延迟求值一个在于最小化求值。
+
+“延迟求值” - 如下的一个 `lazy_sum` 函数，不返回求和结果，而是返回求和的函数，真正需要求和结果时才计算（一般由装饰实现）
+```
+def lazy_sum(*args):
+    def sum():
+        s = 0
+        for n in args:
+            s = s + n
+        return s
+    return sum
+
+sum = lazy_sum(1,2,3)
+print(sum())
+```
+
+“最小化求值” - 使用生成器，使输出长度无限的数据流成为可能（实际只计算到需要返回的数据）
+```
+def fib():
+    a, b = 0, 1
+    while True:
+        yield a
+        a, b = b, a + b
+
+fib_generator = fib()
+print([next(fib_generator) for x in range(10)])
+```
+
+此外，支持惰性计算这一特性的语言，如 python，如果存在表达式 `if x and y`，在 `x` 为 `false` 的情况下 `y` 表达式的值将不再计算，避免不必要的计算以提升性能
+```
+import time
+
+def fib(n):
+    if n < 2:
+        return n
+    return fib(n - 1) + fib(n - 2)
+
+x = 514229
+y = False
+start = time.clock()
+
+# if x in [fib(n) for n in range(30)] and y:
+#     pass
+
+if y and x in [fib(n) for n in range(30)]:
+    pass
+
+print(time.clock() - start)
+```
+如上，`x in [fib(n) for n in range(30)]` 为 `True`，`y` 为 `Flase`，交换 `and` 操作符两侧的表达式，`Flase` 在前可以显著的减少程序执行时间。
+
+## Continuations
+
 # 参考文档
 1. [Functional Programming](http://www.defmacro.org/2006/06/19/fp.html) 一个使用 Java 示例的函数式编程的总体介绍。
-- Higher Order Functions 高阶函数
-- Currying 柯里化
-- Lazy Evaluation 惰性求值
-- Closures 闭包
-- Continuations 延续
+	- Higher Order Functions 高阶函数
+	- Currying 柯里化
+	- Lazy Evaluation 惰性求值
+	- Closures 闭包
+	- Continuations 延续
 1. 阮一峰 [函数式编程入门教程](http://www.ruanyifeng.com/blog/2017/02/fp-tutorial.html)
-[Python Advanced Course Topics](https://www.python-course.eu/currying_in_python.php)
+2. [Python Advanced Course Topics](https://www.python-course.eu/currying_in_python.php)
