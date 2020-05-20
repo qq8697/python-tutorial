@@ -143,6 +143,31 @@ print(time.clock() - start)
 如上，`x in [fib(n) for n in range(30)]` 为 `True`，`y` 为 `Flase`，交换 `and` 操作符两侧的表达式，`Flase` 在前可以显著的减少程序执行时间。
 
 ## Continuations
+连续化是函数的一种泛化。函数不一定要返回到调用方，也可以返回到程序的任何部分，“continuation”是我们可以选择传递给函数的参数，它指定函数应该返回的位置。字面意思比较难理解，看以下代码：
+```
+def plus(x, y):
+    return x + y
+
+def square(p):
+    return pow(p, 2)
+
+i = plus(5, 10)
+j = square(i)
+print(j)
+```
+在调用 plus 函数的地方返回 15 给变量 i，之后 i 的值被用来调用 square，因为第二行取决于对第一行的成功求值，所以不能重排这些代码行。
+可以使用 Continuation Passing Style 重写此处的代码，其中 plus 函数不返回到原始调用方，而是返回给 square 函数。
+```
+def plus(x, y, f):
+    return f(x + y)
+
+def square(p):
+    return pow(p, 2)
+
+j = plus(5, 10, square)
+print(j)
+```
+在本例中，square 就是 plus 的 continuation。
 
 # 参考文档
 1. [Functional Programming](http://www.defmacro.org/2006/06/19/fp.html) 一个使用 Java 示例的函数式编程的总体介绍。
