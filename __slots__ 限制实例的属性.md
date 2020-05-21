@@ -1,4 +1,6 @@
-# __slots__ 限制实例的属性
+# __slots__
+
+## __slots__ 限制实例的属性
 默认情况下，类的实例使用字典（ `__dict__` ）存储其自身的属性，如果实例的属性很少会浪费空间，当创建大量实例时，空间消耗会非常严重。
 ```
 class Cat:
@@ -30,7 +32,6 @@ class Cat:
 tom = Cat("Tom", 2)
 # print(tom.__dict__) # AttributeError: 'Cat' object has no attribute '__dict__'
 ```
-
 `__slots__` 可以用来限制该类的实例属性，不论是静态定义的还是动态添加的
 ```
 class Cat:
@@ -49,6 +50,7 @@ print(tom.friend)
 # tom.age = 2 # 'Cat' object has no attribute 'age'
 # print(tom.age)
 ```
+由于 `age` 没有被放到 `__slots__` 中，所以不能绑定 `age` 属性，试图绑定 `age` 将得到 `AttributeError` 的错误。
 
 ## 番内：动态语言的特性 - 为实例动态的添加属性和方法
 python 是一门动态语言，有其灵活性，其动态表现在在程序执行过程中，用类创建实例之后，可以给该实例绑定新的属性和方法。
@@ -74,6 +76,49 @@ print(tom.age)
 # Cat.set_age = set_age
 ```
 ps. 通常情况下，`Cat.set_age` 的 `set_age` 方法应该定义在类中，此处这么写只是为了演示在程序运行的过程中为实例动态添加方法。
+
+## __slots__ 进阶：
+父类定义 `__slots__` 仅对父类实例起作用，对子类是不起作用的；
+```
+class Cat:
+    __slots__ = ('name')
+
+    def __init__(self, name):
+        self.name = name
+
+class Tailless(Cat):
+    pass
+
+tom = Tailless('tom')
+tom.age = 2
+print(tom.age)
+```
+
+父类未定义 `__slots__`，子类定义 `__slots__` 没有意义，因为父类的 `__dict__` 属性始终可以被访问。（属性查找）
+	```
+	class Cat:
+	    def __init__(self, name):
+	        self.name = name
+	
+	class Tailless(Cat):
+	    __slots__ = ('name')
+	
+	tom = Tailless('tom')
+	tom.age = 2
+	print(tom.age)
+	```
+
+使用 `__slots__` 后仍想要动态添加属性，可以将 `__dict__` 加入到 `__slots__` 中 <-- **如果没有 `__dict__`，无法为实例分配未在 `__slots__` 定义的属性**。
+```
+class Cat:
+    __slots__ = ('name', '__dict__')
+    def __init__(self, name):
+        self.name = name
+
+tom = Cat('tom')
+tom.age = 2
+print(tom.age)
+```
 
 # 参考文档
 1. 官网 [__slots__](https://docs.python.org/3.5/reference/datamodel.html?highlight=__slots__#object.__slots__) | [types](https://docs.python.org/3.5/library/types.html)
