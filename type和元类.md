@@ -95,6 +95,8 @@ print(object.__class__) # <class 'type'>
 可以在创建类的时候使用 `metaclass` 参数指定元类，如果未指定，即使用**默认的元类 `type`** 创建类。（[`__metaclass__`](https://docs.python.org/3.5/library/2to3.html?highlight=__metaclass__) （python2 语法））
 
 ## 自定义元类
+元类的用途：拦截类的创建 -> 修改类 -> 返回修改之后的类
+
 假定有一个需求：模块里的所有的类的属性都应该是大写形式，可以在模块级别定义元类，所有类都通过这个元类来创建的方式实现。
 
 实际上元类不需要是一个正式的类，以下使用函数实现元类：
@@ -144,9 +146,8 @@ print(hasattr(f, 'bar'))
 print(hasattr(f, 'BAR'))
 ```
 1. 自定义的元类需要继承 `type` 类，否则会报 `TypeError: metaclass conflict` 错误。
-2. `__new__` 用来创建对象并返回，很少重写，除非希望能够控制对象的创建。`metaclass` 指示 Python 解释器在创建类时，要通过 `元类.__new__()` 来创建，所以这里需要重写。
+2. `__new__` 用来创建对象并返回，很少重写，除非希望能够控制对象的创建。`metaclass` 指示 Python 解释器在创建类（对象）时，要通过 `元类.__new__()` 来创建，所以这里需要重写。
 
-元类的用途：拦截类的创建/修改类/返回修改之后的类
 
 
 
