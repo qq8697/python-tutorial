@@ -94,21 +94,21 @@ def main():
     ...
     while True:
         # 等待新客户端连接
-        client_socket, client_addr = tcp_socket.accept()
+        new_socket, client_addr = tcp_socket.accept()
         # 为这个客户端服务
-        p = multiprocessing.Process(target=service_client, args=(client_socket, client_addr))
+        p = multiprocessing.Process(target=service_client, args=(new_socket, client_addr))
         p.start()
         # 因为子进程已经复制了父进程的套接字等资源，所以父进程调用close不会将他们对应的这个链接关闭的
-        client_socket.close()
+        new_socket.close()
 
-        # t = threading.Thread(target=service_client, args=(client_socket, client_addr))
+        # t = threading.Thread(target=service_client, args=(new_socket, client_addr))
         # t.start()
 
-        # g = gevent.spawn(service_client, client_socket, client_addr)
+        # g = gevent.spawn(service_client, new_socket, client_addr)
 
 ...
 ```
-1. 创建子进程时会复制创建之前主进程所有的变量，`new_socket`和`socket` 指向同一个fd（文件描述符），该fd此时有2个引用，子进程 `socket.close` 后仍需主进程 `new_socket.close` ，该fd的引用为0，才能真正关闭socket。
+1. 创建子进程时会复制创建之前主进程所有的变量，`new_socket`和`client_socket` 指向同一个fd（文件描述符），该fd此时有2个引用，子进程 `client_socket.close` 后仍需主进程 `new_socket.close` ，该fd的引用为0，才能真正关闭socket。
 2. 创建子线程时无需主进程 `new_socket.close`。
 （TODO 哪里体现堵塞？ -> 总是进入服务等待新的连接）
 
