@@ -351,9 +351,7 @@ def login():
 修改 `myframe.py` 代码如下：
 ```
 @Router(r"add/(\d+)\.html")
-def add(m):
-    # 获取添加id
-    id = m.group(1)
+def add(id):
     # 判断该id是否存在
     # 判断该id是否已经添加
     # ...
@@ -370,7 +368,11 @@ def application(env, set_response_header):
         for url, func in Router_Path.items():
             m = re.match(url, file_name)
             if m:
-                return func(m)
+                # 以是否有匹配参数简单区分 index.html 和 add/1.html
+                if len(m.groups()) == 0:
+                    return func()
+                else:
+                    return func(*m.groups())
         else:
             return "路由未匹配 %s" % file_name
     except:
