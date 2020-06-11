@@ -1,7 +1,6 @@
 # MySQL
-关系型数据库管理系统
 
-## 数据类型（常用）
+## （常用）数据类型
 整数：
 - `smallint`： 字节大小 2，有符号范围 -32768 ~ 32767，无符号范围 0 ~ 65535。
 - `int`： 字节大小 4，有符号范围 -2147483648 ~2147483647，无符号范围 0 ~ 4294967295。
@@ -80,17 +79,17 @@ show tables;
 -- if not exists
 -- foreign key references（尽量少用外键，如果有外键完整性约束，需由程序控制）
 create table if not exists classes (
-id int, 
-name varchar(20)
+	id int, 
+	name varchar(20)
 );
 create table students (
-id int unsigned not null primary key auto_increment,
-name varchar(20),
-age tinyint unsigned,
-high decimal(5,2),
-gender enum("男","女","保密") default "保密",
-cls_id int unsigned,
-foreign key(cls_id) references classes(id),
+	id int unsigned not null primary key auto_increment,
+	name varchar(20),
+	age tinyint unsigned,
+	high decimal(5,2),
+	gender enum("男","女","保密") default "保密",
+	cls_id int unsigned,
+	foreign key(cls_id) references classes(id),
 );
 
 insert into students values(0, "whb", 18 ,180.15, "男", 0);
@@ -181,11 +180,11 @@ select * from tb_name where field is null;
 -- 聚合函数
 	-- 总数 count
 	select count(*) from tb_name where condition;
-	-- 最大值 max(field)
-	-- 最小值 min(field)
-	-- 求和 sum(field)
-	-- 平均值 avg(field)
-	-- 近似值 round(field)
+	-- 最大值 max()
+	-- 最小值 min()
+	-- 求和 sum()
+	-- 平均值 avg()
+	-- 近似值 round()
 
 -- 分组
 	-- group by
@@ -222,27 +221,101 @@ select * from tb_name where field is null;
 	select * from tb_name1 where (field1,field2) > (select avg(field1),avg(field2) from tb_name2);
 ```
 
-### 小结：查询完整格式
+### 小结：完整的 select 格式
 ```
-SELECT select_expr [,select_expr,...] [      
-      FROM tb_name
-      [WHERE 条件判断]
-      [GROUP BY {col_name | postion} [ASC | DESC], ...] 
-      [HAVING WHERE 条件判断]
-      [ORDER BY {col_name|expr|postion} [ASC | DESC], ...]
-      [LIMIT {[offset,]rowcount | row_count OFFSET offset}]
-]
+select distinct *
+from 表名
+where ....
+group by ... having ...
+order by ...
+limit start,count
 ```
 执行顺序为：
 1. from 表名
-where ....
-group by ...
-select distinct *
-having ...
-order by ...
-limit start,count
+2. where ....
+3. group by ...
+4. select distinct *
+5. having ...
+6. order by ...
+7. limit start,count
 
-## MYSQL 与 python
+## MYSQL 进阶
+1. **视图** `select` 语句执行后返回的结果集，是对若干张基本表的引用，一张虚表
+	```
+	-- 定义视图 
+	create view vw_name as select语句;
+	
+	-- 查看表（视图也是表） 
+	show tables;
+
+	-- 查看视图描述
+	desc vw_name;
+	
+	-- 使用视图 
+	select * from vw_name;
+	
+	-- 删除视图 
+	drop view vw_name;
+	```
+	1. 视图作用：
+		1. 提高重用性
+		1. 重构数据库，却不影响已有程序的运行
+		1. 提高安全性，对不同的用户提供不同视图
+		1. 数据更清晰
+
+2. **事务** 一个操作序列 要么都执行 要么都不执行
+	```
+	-- 开启事务（或者 `begin`）
+	start transaction;
+
+	-- 数据变更（变更会维护到本地缓存中，而不是物理表）
+	select balance from checking where id = 1;
+	update checking set balance = balance - 200 where id = 1;
+	update checking set balance = balance + 200 where id = 2;
+
+	-- 提交事务（将缓存中的数据变更更新到物理表）
+	commit;
+
+	-- 回滚事务（放弃缓存中的数据变更）
+	rollback;
+	```
+	1. 四大特性（ACID）
+		1. 原子性（atomicity）一个事物为不可分割的最小工作单元
+		2. 一致性（consistency）从一个一致性状态转换到另一个一致性状态
+		3. 隔离性（isolation）一个事物提交前，对其它事物不可见
+		4. 持久性（durability）
+	1. 表的引擎必须是 innodb 类型才可以使用事务。（mysql 表默认使用 innodb）（`show create table tb_name;` 可以查看表的引擎）
+	2. 修改数据的命令会自动的触发事务，包括 `insert`、`update`、`delete`；手动开启事务的原因是：一次进行多个数据的修改，要么一起成功，要么一起失败。
+
+3. **索引** 提高查询效率（会影响插入和更新的速度，因为插入和更新时需要更新每个索引文件）
+	```
+	-- 创建索引 
+	create index idx_name on tb_name(field(long));
+
+	-- 查看索引 
+	show index from tb_name;
+
+	-- 删除索引 
+	drop index idx_name on tb_name;
+	```
+	1. 开启运行时间监测 `set profiling = 1;` 
+	2. 查看执行用时 `show profilies`
+	
+
+## the more for MYSQL  
+4. // 账户管理
+	1. 账户体系
+		1. 服务实例级账号 
+		2. 数据库级别账号 对特定的数据库执行增删改查
+		3. 数据表级别账号
+		4. 字段级别的权限
+		1. 存储过程级别的账号
+	1. 账户操作：查看用户、创建账户、删除账户、修改密码、授权等
+
+5. // 主从
+	1. 同步机制 基于二进制日志机制，主服务器使用二进制日志记录数据库的变动情况，从服务器通过读取和执行该文件来保持和主服务器的数据一致。
+
+
 
 # 参考文档
 1. [mysql](http://www.mysql.com/) 官网

@@ -134,3 +134,4 @@ sqlite3 模块的隐式事务管理：
 1. 官网 [sqlite3](https://docs.python.org/3.5/library/sqlite3.html) 模块
 2. [pysqlite](https://github.com/ghaering/pysqlite) （sqlite3 在外部使用 “pysqlite” 名字）
 3. [SQLite](https://www.sqlite.org) 官网，其文档描述了它所支持的 SQL 语法和可用的数据类型。
+4. [DB-API 2.0 规范](https://www.python.org/dev/peps/pep-0249/)
