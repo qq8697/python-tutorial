@@ -1,6 +1,13 @@
 # sqllite
 sqllite 轻量级的基于磁盘的数据库，不需要独立的服务器进程，使用一种非标准的 SQL 查询语言来访问
 
+## SQLite 与 Python 类型
+SQLite 原生支持如下的类型： `NULL`，`INTEGER`，`REAL`，`TEXT`，`BLOB`。 对应 python 的 `None`， `int`， `float`， `str`， `bytes`。
+
+sqlite3 模块的类型系统的扩展：
+1. [使用适配器将额外的 Python 类型保存在 SQLite 数据库中](https://docs.python.org/3.5/library/sqlite3.html#using-adapters-to-store-additional-python-types-in-sqlite-databases)
+2. [将 SQLite 值转换为自定义Python 类型](https://docs.python.org/3.5/library/sqlite3.html#converting-sqlite-values-to-custom-python-types)
+
 ## 创建数据表
 ```
 import sqlite3
@@ -13,12 +20,12 @@ cursor = conn.cursor()
 # 执行 sql 语句
 # 创建表
 create_table_sql = '''CREATE TABLE stocks (
-short text,
-change text,
-turnover text,
-price real,
-highs real,
-time text)
+	short text,
+	chg text,
+	turnover text,
+	price real,
+	highs real,
+	time text)
 '''
 cursor.execute(create_table_sql)
 
@@ -48,7 +55,7 @@ conn.close()
 	6. `fetchall()` 获取查询结果集的所有（剩余）行，返回一个列表，当没有可用行时将返回一个空列表。
 	7. `arraysize`，控制 fetchmany() 返回行数的可读取/写入属性，默认值为 1。
 
-## 插入数据
+## 插入数据（更新数据&删除数据（略））
 ```
 import sqlite3
 
@@ -90,16 +97,17 @@ cursor = conn.cursor()
 
 # 执行 sql 语句
 # 查询数据
+
 # short_name = "中集集团"
+# short_name = "' or 1=1 or '1"
 # cursor.execute("SELECT * FROM stocks WHERE short = '%s'" % short_name)
+# for stock in cursor.fetchall():
+#    print(stock)
 
 query_sql = "SELECT * FROM stocks WHERE short=?"
 short_name = ("中集集团",)
+short_name = ("' or 1=1 or '1",)
 cursor.execute(query_sql, short_name)
-print(cursor.fetchone())
-
-query_sql = "SELECT * FROM stocks ORDER BY price"
-cursor.execute(query_sql)
 for stock in cursor.fetchall():
     print(stock)
 
@@ -111,13 +119,6 @@ for stock in cursor.fetchall():
 conn.close()
 ```
 1. **不应该使用 Python 的字符串操作来创建查询语句，会使程序容易受到 SQL 注入攻击 --> 使用 `?` 占位符来代替值，然后把对应的值组成的元组做为 `execute()` 或 `executemany()` 方法的第二个参数**。
-
-## SQLite 与 Python 类型
-SQLite 原生支持如下的类型： `NULL`，`INTEGER`，`REAL`，`TEXT`，`BLOB`。 对应 python 的 `None`， `int`， `float`， `str`， `bytes`。
-
-sqlite3 模块的类型系统的扩展：
-1. [使用适配器将额外的 Python 类型保存在 SQLite 数据库中](https://docs.python.org/3.5/library/sqlite3.html#using-adapters-to-store-additional-python-types-in-sqlite-databases)
-2. [将 SQLite 值转换为自定义Python 类型](https://docs.python.org/3.5/library/sqlite3.html#converting-sqlite-values-to-custom-python-types)
 
 ## 事务管理
 sqlite3 模块的隐式事务管理：
@@ -134,4 +135,4 @@ sqlite3 模块的隐式事务管理：
 1. 官网 [sqlite3](https://docs.python.org/3.5/library/sqlite3.html) 模块
 2. [pysqlite](https://github.com/ghaering/pysqlite) （sqlite3 在外部使用 “pysqlite” 名字）
 3. [SQLite](https://www.sqlite.org) 官网，其文档描述了它所支持的 SQL 语法和可用的数据类型。
-4. [DB-API 2.0 规范](https://www.python.org/dev/peps/pep-0249/)
+4. [DB-API 2.0 规范](https://www.python.org/dev/peps/pep-0249/) （需科学上网）
