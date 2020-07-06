@@ -15,6 +15,8 @@ print(list(it))
 Iterator 是惰性序列，可以通过 `list()` 函数让它把整个序列都计算出来并返回一个 `list`
 使用列表推导式 `[f(x) for x in [1,2,3]]` 能达到同样的效果
 
+
+
 ### 2. filter
 `filter(function, iterable)` 把传入的函数依次作用于 可迭代对象中每一项，然后根据返回值是 `True` 还是 `False` 决定是否保留，把保留元素的集合作为迭代器返回
 
@@ -27,6 +29,17 @@ it = filter(is_even, [1,2,3])
 print(list(it))
 ```
 使用列表推导式 `[x for x in [1,2,3] if is_even(x)]` 能达到同样的效果
+
+应用实例：在列表、字典、集合中筛选数据
+1. 列表
+列表解析： `[x for x in list if x >= 0]`
+`filter` 函数： `filter(lambda x : x >= 0, list)`
+
+1. 字典
+字典解析 `{k: v for k, v in dict.iteritems() if v >= 0}`
+
+1. 集合
+集合解析 `{x for x in set if x >= 0}`
 
 ### 3. sorted
 `sorted(iterable, key=None, reverse=False)` 返回排序后的列表，可以接收一个关键字参数 `key` 实现自定义的排序，`key` 指定的函数（带有单个参数）将作用于可迭代对象的每一个元素上，并根据其返回的结果进行排序
@@ -53,6 +66,27 @@ print(r)
 
 番外：**排序的稳定性**
 如果一个排序确保**不会改变比较结果相等的元素的相对顺序**就称其为稳定的 --> 这有利于进行多重排序（例如先按部门、再按薪级排序）
+
+应用实例：根据字典值的大小，对字典中的项排序
+构造数据：
+```
+from random import randint
+
+d = { x: randint(60, 100) for x in 'abcdef'}
+print(d)
+```
+
+利用 zip 将字典数据转化为元组后再使用 `sorted` 函数排序
+```
+r = sorted(zip(d.values(), d.keys()))
+print(r)
+```
+
+或为 `sorted` 函数传递 `key` 参数 
+```
+r = sorted(d.items(), key=lambda x:x[1])
+print(r)
+```
 
 ### 4. enumerate
 `enumerate(iterable, start=0)` ，计数可迭代对象中的每一个元素，返回包含每个计数（从 `start` 开始）和元素构成的元组组成的集合，这个集合是一个枚举对象，也是迭代器对象。
@@ -161,7 +195,8 @@ print(list(it))
 	it4 = map(f,[2,3,10])
 	print(list(it4))
 	```
-1. `accumulate(iterable[, func])`，参考类似函数 `functools.reduce()` 执行同样的计算, 只返回最终结果，`accumulate()` 会返回一个迭代器来输出所有中间结果
+1. `accumulate(iterable[, func])`，参考类似函数 `functools.
+2. ()` 执行同样的计算, 只返回最终结果，`accumulate()` 会返回一个迭代器来输出所有中间结果
 
 
 ### 3. 选择元素：
@@ -262,6 +297,34 @@ print(r)
 ```
 
 `itertools` 模块的 `accumulate(iterable[, func])` 函数，执行同样的计算, 不同于 `reduce` 只返回最终结果，会返回一个迭代器来输出所有中间结果
+
+应用实例：找到多个字典中的公共键
+```
+# {'a': 3, 'd': 2, 'c': 1} 
+# {'d': 3, 'a': 3, 'e': 3} 
+# {'f': 4, 'd': 3, 'b': 3, 'a': 2, 'e': 4}
+# => {'d', 'a'}
+```
+
+构造数据：
+```
+from random import randint, sample
+data1 = {x: randint(1, 4) for x in sample('abcdefg',randint(3, 6))}
+data2 = {x: randint(1, 4) for x in sample('abcdefg',randint(3, 6))}
+data3 = {x: randint(1, 4) for x in sample('abcdefg',randint(3, 6))}
+
+print(data1, data2, data3)
+```
+
+利用 `set` 的交集 `&` 操作
+```
+from functools import reduce
+m = map(dict.keys, [data1, data2, data3])
+r = reduce(lambda a,b:a & b, m)
+print(r)
+```
+1. 使用字典的 `keys` 方法可以得到字典 keys 的集合，使用 `map` 函数，得到所有字典的 keys 的集合
+1. 使用 `functools` 模块的 `reduce` 函数，取所有字典的 keys 的集合的交集
 
 ### 2. partial
 `partial(func, *args, **keywords)` 通过给定部分参数，将已有的函数变形成新的函数
